@@ -1,4 +1,4 @@
-package problemtwo.minheap;
+package huffman.minheap;
 
 import java.util.ArrayList;
 

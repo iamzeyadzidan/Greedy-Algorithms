@@ -1,15 +1,17 @@
-package problemtwo.files;
+package huffman.files;
 
-import problemtwo.Huffman;
-import problemtwo.HuffmanNode;
+import huffman.Huffman;
+import huffman.HuffmanNode;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Compressor {
-    private Compressor() {}
+    private Compressor() {
+    }
 
     public static boolean compress(int n, String path) {
         try {
@@ -18,7 +20,7 @@ public class Compressor {
             Map<String, Integer> frequencies = new HashMap<>();
             StringBuilder sb;
             try (InputStream inputStream = new FileInputStream(path);
-            BufferedInputStream bis = new BufferedInputStream(inputStream)) {
+                 BufferedInputStream bis = new BufferedInputStream(inputStream)) {
                 while ((counter = bis.read(fileAsBytes)) != -1) {
                     // construct our map of bytes and their corresponding frequencies
                     for (int i = 0; i < counter; i += n) {
@@ -39,7 +41,9 @@ public class Compressor {
             sb = new StringBuilder();
 
             // create the header file to help us in decompression later.
-            sb.append(Huffman.prefixCode.size() + 1).append("\n"); // header length (Byte unit length and prefix code length).
+            int fileSize = (int) Files.size(new File(path).toPath());
+            sb.append(Huffman.prefixCode.size()).append("\n"); // map length (Byte unit length and prefix code length).
+            sb.append("size=").append(fileSize).append("\n");
             sb.append("n=").append(n).append("\n");
             for (Map.Entry<String, String> entry : Huffman.prefixCode.entrySet()) {
                 sb.append(entry.getKey()).append("=").append(entry.getValue()).append("\n");
@@ -56,15 +60,15 @@ public class Compressor {
 
     private static void bitCompress(String path, int n, String header) throws IOException {
         /*
-        * helping hands for preparing the reading operation.
-        * */
-        byte[] fileAsBytes = new byte[n * 10000];   // size is a multiple of n to reduce fragmentation
-        byte[] compressedFile;
+         * helping hands for preparing the reading operation.
+         * */
+        byte[] fileAsBytes = new byte[n * 5000];   // size is a multiple of n to reduce fragmentation
+        byte[] compressedChunk;
         int counter;
 
         /*
-        * preparing the output path to help the buffered output stream.
-        * */
+         * preparing the output path to help the buffered output stream.
+         * */
         StringBuilder sb = new StringBuilder();
         String[] inputPathArray = path.split("\\\\");
         int inputLength = inputPathArray.length;
@@ -83,22 +87,23 @@ public class Compressor {
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             // write the header to the file
             oos.writeObject(header);
-            counter = bis.read(fileAsBytes);
-            while (counter > 0) {
+            int limit;
+            sb = new StringBuilder();
+            while ((counter = bis.read(fileAsBytes)) != -1) {
                 // compress the file itself
-                sb = new StringBuilder();
                 for (int i = 0; i < counter; i += n) {
                     StringBuilder bytes = new StringBuilder();
                     appendKey(n, fileAsBytes, counter, i, bytes);
                     sb.append(Huffman.prefixCode.get(bytes.toString()));
                 }
-//                System.out.println(sb);
-                BitSet fileAsBitSet = stringToBitSet(sb.toString());
-                compressedFile = fileAsBitSet.toByteArray();
-//                System.out.println(Huffman.prefixCode);
-//                System.out.println(new String(compressedFile));
-                fos.write(compressedFile);
-                counter = bis.read(fileAsBytes);
+                limit = sb.length() - sb.length() % 8;
+                BitSet bits = stringToBitSet(sb.substring(0, limit));
+                sb.delete(0, limit);
+                compressedChunk = bits.toByteArray();
+                fos.write(compressedChunk);
+            }
+            if (sb.length() > 0) {
+                fos.write(stringToBitSet(sb.toString()).toByteArray());
             }
         }
     }
@@ -121,7 +126,6 @@ public class Compressor {
     }
 
     private static BitSet stringToBitSet(String bitString) {
-        bitString = bitString.replace("null", "");
         BitSet bits = new BitSet(bitString.length());
         for (int i = 0; i < bitString.length(); i++) {
             bits.set(i, (bitString.charAt(i) == '1'));

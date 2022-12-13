@@ -1,9 +1,10 @@
-package problemtwo;
+package huffman;
 
 public class TreeTraverser {
-    private TreeTraverser() {}
-
     public static int size = 0;
+
+    private TreeTraverser() {
+    }
 
     public static void printTree(HuffmanNode root) {
         if (!root.getChildren().isEmpty()) {

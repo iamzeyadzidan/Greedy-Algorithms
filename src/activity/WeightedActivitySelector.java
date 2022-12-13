@@ -1,4 +1,4 @@
-package problemone;
+package activity;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,12 +9,13 @@ import java.util.*;
 public class WeightedActivitySelector {
     public static void main(String[] args) throws IOException {
         // generating random test cases to test the algorithm. just give another argument after the path = true.
-        if (args[1] != null && args[1] == "true") {
+        try {
             generateRandomTestCases(args[1]);
+        } catch (ArrayIndexOutOfBoundsException ignored) {
         }
 
         // getting the input file path to create an output path in the same directory.
-        String inputPath = args[0];
+        String inputPath = (args.length > 1) ? args[1] : args[0];
         String[] inputPathArray = inputPath.split("\\\\");
         StringBuilder sb = new StringBuilder();
         int inputLength = inputPathArray.length;

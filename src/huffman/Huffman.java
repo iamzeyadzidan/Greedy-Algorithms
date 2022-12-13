@@ -1,7 +1,7 @@
-package problemtwo;
+package huffman;
 
-import problemtwo.files.Compressor;
-import problemtwo.files.Decompressor;
+import huffman.files.Compressor;
+import huffman.files.Decompressor;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,7 +15,8 @@ public class Huffman {
         String operation = args[0];
         long start = System.currentTimeMillis();
         switch (operation) {
-            case "c" -> System.out.println(Compressor.compress(Integer.parseInt(args[2]), args[1]));    // False means an error has occurred.
+            case "c" ->
+                    System.out.println(Compressor.compress(Integer.parseInt(args[2]), args[1]));    // False means an error has occurred.
             case "d" -> System.out.println(Decompressor.decompress(args[1]));   // False means an error has occurred.
             default -> System.out.println("Error: Not a valid operation.");
         }

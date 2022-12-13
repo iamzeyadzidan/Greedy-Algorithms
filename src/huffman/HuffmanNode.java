@@ -1,12 +1,12 @@
-package problemtwo;
+package huffman;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HuffmanNode<T extends Comparable<T>> implements Comparable<HuffmanNode<T>> {
     private final T element;
-    private int frequency;
     private final ArrayList<HuffmanNode<T>> children;
+    private int frequency;
 
     public HuffmanNode() {
         element = null;
